@@ -118,6 +118,12 @@ const funnelStrength = [
   { stage: "Convert", value: 62 }
 ];
 
+const channelMix = [
+  { label: "Paid", value: 45, color: "#ff8159" },
+  { label: "Referral", value: 35, color: "#16a2a6" },
+  { label: "Organic", value: 20, color: "#6f90f2" }
+];
+
 const menuBtn = document.getElementById("menuBtn");
 const mainNav = document.getElementById("mainNav");
 const navLinks = document.querySelectorAll(".main-nav a");
@@ -143,11 +149,13 @@ const acqCaption = document.getElementById("acqCaption");
 const acqValue = document.getElementById("acqValue");
 const funnelBars = document.getElementById("funnelBars");
 const funnelCaption = document.getElementById("funnelCaption");
-
-const highlightTitle = document.getElementById("highlightTitle");
-const highlightText = document.getElementById("highlightText");
-const prevHighlight = document.getElementById("prevHighlight");
-const nextHighlight = document.getElementById("nextHighlight");
+const pieRing1 = document.getElementById("pieRing1");
+const pieRing2 = document.getElementById("pieRing2");
+const pieRing3 = document.getElementById("pieRing3");
+const pieLegend = document.getElementById("pieLegend");
+const pieCaption = document.getElementById("pieCaption");
+const pieActiveLabel = document.getElementById("pieActiveLabel");
+const pieActiveValue = document.getElementById("pieActiveValue");
 
 const safeHtml = (value) =>
   value
@@ -325,6 +333,39 @@ const renderMiniCharts = () => {
     funnelCaption.textContent =
       "Balanced funnel health across lead generation, qualification, follow-up, and conversion stages.";
   }
+
+  if (pieLegend && pieCaption && pieRing1 && pieRing2 && pieRing3) {
+    const rings = [pieRing1, pieRing2, pieRing3];
+    const radius = 42;
+    const circumference = 2 * Math.PI * radius;
+    let offsetCursor = 0;
+
+    channelMix.forEach((segment, index) => {
+      const ring = rings[index];
+      const segmentLength = (segment.value / 100) * circumference;
+
+      ring.setAttribute("stroke-dasharray", `${segmentLength} ${circumference - segmentLength}`);
+      ring.setAttribute("stroke-dashoffset", String(-offsetCursor));
+      offsetCursor += segmentLength;
+    });
+
+    pieLegend.innerHTML = channelMix
+      .map(
+        (segment, index) => `
+        <div class="pie-legend-item" data-pie-index="${index}">
+          <span class="pie-name">
+            <span class="pie-dot" style="background:${segment.color}"></span>${safeHtml(segment.label)}
+          </span>
+          <strong>${segment.value}%</strong>
+        </div>
+      `
+      )
+      .join("");
+
+    pieCaption.textContent = `${channelMix[0].label} contributes ${channelMix[0].value}% of current acquisition mix.`;
+    if (pieActiveLabel) pieActiveLabel.textContent = channelMix[0].label;
+    if (pieActiveValue) pieActiveValue.textContent = `${channelMix[0].value}%`;
+  }
 };
 
 const animateMiniBars = () => {
@@ -336,6 +377,28 @@ const animateMiniBars = () => {
 
 let trendIndex = 0;
 let trendTimer;
+
+const setActivePieSegment = (index) => {
+  const rings = [pieRing1, pieRing2, pieRing3];
+  if (!rings.every(Boolean)) return;
+
+  rings.forEach((ring, ringIndex) => {
+    ring.classList.toggle("is-active", ringIndex === index);
+    ring.classList.toggle("is-dim", ringIndex !== index);
+  });
+
+  document.querySelectorAll(".pie-legend-item").forEach((item) => {
+    const itemIndex = Number(item.getAttribute("data-pie-index"));
+    item.classList.toggle("is-active", itemIndex === index);
+  });
+
+  const segment = channelMix[index];
+  if (pieCaption) {
+    pieCaption.textContent = `${segment.label} contributes ${segment.value}% of current acquisition mix.`;
+  }
+  if (pieActiveLabel) pieActiveLabel.textContent = segment.label;
+  if (pieActiveValue) pieActiveValue.textContent = `${segment.value}%`;
+};
 
 const startMiniChartCaptions = () => {
   if (!acqSparkDot || !acqCaption || !acqValue || !acqSparkPath) return;
@@ -361,6 +424,13 @@ const startMiniChartCaptions = () => {
       funnelCaption.textContent =
         `${item.month} view: strongest stage is ${topStage.stage} at ${topStage.value}%.`;
     }
+
+    const activeBar = trendIndex % funnelStrength.length;
+    document.querySelectorAll(".mini-bar-row").forEach((row, idx) => {
+      row.classList.toggle("is-active", idx === activeBar);
+    });
+
+    setActivePieSegment(trendIndex % channelMix.length);
   };
 
   update();
@@ -369,24 +439,6 @@ const startMiniChartCaptions = () => {
     trendIndex = (trendIndex + 1) % acquisitionTrend.length;
     update();
   }, 2800);
-};
-
-let highlightIndex = 0;
-let highlightTimer;
-
-const updateHighlight = () => {
-  if (!highlightTitle || !highlightText || achievements.length === 0) return;
-  const item = achievements[highlightIndex % achievements.length];
-  highlightTitle.textContent = item.title;
-  highlightText.textContent = item.points[0] || "";
-};
-
-const startHighlightRotation = () => {
-  if (highlightTimer) clearInterval(highlightTimer);
-  highlightTimer = setInterval(() => {
-    highlightIndex = (highlightIndex + 1) % achievements.length;
-    updateHighlight();
-  }, 4000);
 };
 
 const animateCounter = (el, target, suffix) => {
@@ -530,22 +582,6 @@ const setupNav = () => {
   });
 };
 
-const setupHighlightControls = () => {
-  if (!prevHighlight || !nextHighlight) return;
-
-  prevHighlight.addEventListener("click", () => {
-    highlightIndex = (highlightIndex - 1 + achievements.length) % achievements.length;
-    updateHighlight();
-    startHighlightRotation();
-  });
-
-  nextHighlight.addEventListener("click", () => {
-    highlightIndex = (highlightIndex + 1) % achievements.length;
-    updateHighlight();
-    startHighlightRotation();
-  });
-};
-
 const setupForm = () => {
   if (!form || !formNote) return;
 
@@ -607,14 +643,11 @@ const bootstrap = () => {
 
   setActiveNav();
   setProgress();
-  updateHighlight();
-  startHighlightRotation();
   startMiniChartCaptions();
 
   setupReveal();
   setupTyping();
   setupNav();
-  setupHighlightControls();
   setupForm();
   setupBackToTop();
 

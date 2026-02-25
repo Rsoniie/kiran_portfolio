@@ -46,7 +46,7 @@
           <div class="profile-row">
             <figure class="profile-photo" aria-label="Profile photo">
               <img
-                src="../static/kiran.png"
+                src="kiran.png"
                 alt="Kiran Soni profile portrait"
               />
               <figcaption></figcaption>
@@ -84,21 +84,50 @@
         <aside class="stats-card reveal-up" aria-label="Performance snapshot">
           <h2>Performance Snapshot</h2>
           <div class="stats-grid" id="statsGrid"></div>
-
-          <div class="highlight-box" id="highlightBox">
-            <p class="label">Achievement Spotlight</p>
-            <h3 id="highlightTitle"></h3>
-            <p id="highlightText"></p>
-            <div class="highlight-controls">
-              <button type="button" class="ctrl-btn" id="prevHighlight" aria-label="Previous achievement">
-                <i class="bi bi-arrow-left"></i>
-              </button>
-              <button type="button" class="ctrl-btn" id="nextHighlight" aria-label="Next achievement">
-                <i class="bi bi-arrow-right"></i>
-              </button>
-            </div>
-          </div>
         </aside>
+      </div>
+
+      <div class="container hero-spotlight-wrap" id="insights">
+        <div class="mini-graph-grid">
+          <figure class="mini-chart reveal-up">
+            <div class="chart-head">
+              <h3>Acquisition Trend</h3>
+              <span id="acqValue">0%</span>
+            </div>
+            <svg class="spark-svg" id="acqSparkline" viewBox="0 0 320 120" role="img" aria-label="Acquisition trend graph">
+              <polyline id="acqSparkPath" class="spark-line" points=""></polyline>
+              <circle id="acqSparkDot" class="spark-dot" cx="0" cy="0" r="5"></circle>
+            </svg>
+            <figcaption id="acqCaption"></figcaption>
+          </figure>
+
+          <figure class="mini-chart reveal-up">
+            <div class="chart-head">
+              <h3>Funnel Stage Strength</h3>
+              <span>Current Snapshot</span>
+            </div>
+            <div class="mini-bars" id="funnelBars"></div>
+            <figcaption id="funnelCaption"></figcaption>
+          </figure>
+
+          <figure class="mini-chart reveal-up">
+            <div class="chart-head">
+              <h3>Channel Mix</h3>
+              <span id="pieActiveLabel">Paid</span>
+            </div>
+            <div class="pie-wrap">
+              <svg class="pie-svg" viewBox="0 0 120 120" role="img" aria-label="Channel contribution pie chart">
+                <circle class="pie-track" cx="60" cy="60" r="42"></circle>
+                <circle class="pie-ring pie-ring-1" id="pieRing1" cx="60" cy="60" r="42"></circle>
+                <circle class="pie-ring pie-ring-2" id="pieRing2" cx="60" cy="60" r="42"></circle>
+                <circle class="pie-ring pie-ring-3" id="pieRing3" cx="60" cy="60" r="42"></circle>
+              </svg>
+              <div class="pie-value" id="pieActiveValue">0%</div>
+            </div>
+            <div class="pie-legend" id="pieLegend"></div>
+            <figcaption id="pieCaption"></figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 
@@ -129,38 +158,6 @@
           <h2>Recognition & Measurable Impact</h2>
         </div>
         <div class="achievement-grid" id="achievementGrid"></div>
-      </div>
-    </section>
-
-    <section class="section section-soft" id="insights">
-      <div class="container">
-        <div class="section-head reveal-up">
-          <p class="section-tag">Insights</p>
-          <h2>Mini Performance Plots</h2>
-        </div>
-
-        <div class="mini-graph-grid">
-          <figure class="mini-chart reveal-up">
-            <div class="chart-head">
-              <h3>Acquisition Trend</h3>
-              <span id="acqValue">0%</span>
-            </div>
-            <svg class="spark-svg" id="acqSparkline" viewBox="0 0 320 120" role="img" aria-label="Acquisition trend graph">
-              <polyline id="acqSparkPath" class="spark-line" points=""></polyline>
-              <circle id="acqSparkDot" class="spark-dot" cx="0" cy="0" r="5"></circle>
-            </svg>
-            <figcaption id="acqCaption"></figcaption>
-          </figure>
-
-          <figure class="mini-chart reveal-up">
-            <div class="chart-head">
-              <h3>Funnel Stage Strength</h3>
-              <span>Current Snapshot</span>
-            </div>
-            <div class="mini-bars" id="funnelBars"></div>
-            <figcaption id="funnelCaption"></figcaption>
-          </figure>
-        </div>
       </div>
     </section>
 
