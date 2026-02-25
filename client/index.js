@@ -1,6 +1,6 @@
 const profile = {
   name: "Kiran Soni",
-  roles: ["Accountant", "Growth Lead", "Business Development Professional"],
+  roles: ["Accountant", "Growth Lead", "Business Ops"],
   contact: {
     email: "kiransoni2412@gmail.com",
     phone: "+91 6299044678",
@@ -102,6 +102,22 @@ const languages = [
   { name: "Hindi", level: "Native / Fluent", percent: 100 }
 ];
 
+const acquisitionTrend = [
+  { month: "Jan", value: 18 },
+  { month: "Feb", value: 21 },
+  { month: "Mar", value: 24 },
+  { month: "Apr", value: 26 },
+  { month: "May", value: 29 },
+  { month: "Jun", value: 30 }
+];
+
+const funnelStrength = [
+  { stage: "Leads", value: 84 },
+  { stage: "Qualify", value: 77 },
+  { stage: "Follow-up", value: 69 },
+  { stage: "Convert", value: 62 }
+];
+
 const menuBtn = document.getElementById("menuBtn");
 const mainNav = document.getElementById("mainNav");
 const navLinks = document.querySelectorAll(".main-nav a");
@@ -121,6 +137,12 @@ const educationGrid = document.getElementById("educationGrid");
 const achievementGrid = document.getElementById("achievementGrid");
 const skillChips = document.getElementById("skillChips");
 const languageBars = document.getElementById("languageBars");
+const acqSparkPath = document.getElementById("acqSparkPath");
+const acqSparkDot = document.getElementById("acqSparkDot");
+const acqCaption = document.getElementById("acqCaption");
+const acqValue = document.getElementById("acqValue");
+const funnelBars = document.getElementById("funnelBars");
+const funnelCaption = document.getElementById("funnelCaption");
 
 const highlightTitle = document.getElementById("highlightTitle");
 const highlightText = document.getElementById("highlightText");
@@ -252,6 +274,103 @@ const renderSkills = () => {
   }
 };
 
+const toSparkPoints = (values, width, height, pad) => {
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const spread = Math.max(1, max - min);
+  const stepX = (width - pad * 2) / (values.length - 1);
+
+  return values.map((value, index) => {
+    const x = pad + index * stepX;
+    const y = height - pad - ((value - min) / spread) * (height - pad * 2);
+    return { x, y };
+  });
+};
+
+const renderMiniCharts = () => {
+  if (acqSparkPath && acqSparkDot && acqCaption && acqValue) {
+    const points = toSparkPoints(
+      acquisitionTrend.map((item) => item.value),
+      320,
+      120,
+      14
+    );
+
+    acqSparkPath.setAttribute(
+      "points",
+      points.map((point) => `${point.x},${point.y}`).join(" ")
+    );
+
+    acqSparkDot.setAttribute("cx", String(points[0].x));
+    acqSparkDot.setAttribute("cy", String(points[0].y));
+    acqValue.textContent = `${acquisitionTrend[0].value}%`;
+    acqCaption.textContent = `${acquisitionTrend[0].month}: Acquisition performance at ${acquisitionTrend[0].value}%.`;
+  }
+
+  if (funnelBars && funnelCaption) {
+    funnelBars.innerHTML = funnelStrength
+      .map(
+        (item) => `
+        <div class="mini-bar-row">
+          <span class="mini-bar-label">${safeHtml(item.stage)}</span>
+          <div class="mini-bar-track">
+            <div class="mini-bar-fill" data-fill="${item.value}"></div>
+          </div>
+          <span class="mini-bar-value">${item.value}%</span>
+        </div>
+      `
+      )
+      .join("");
+
+    funnelCaption.textContent =
+      "Balanced funnel health across lead generation, qualification, follow-up, and conversion stages.";
+  }
+};
+
+const animateMiniBars = () => {
+  document.querySelectorAll(".mini-bar-fill").forEach((bar) => {
+    const value = Number(bar.getAttribute("data-fill") || 0);
+    bar.style.width = `${value}%`;
+  });
+};
+
+let trendIndex = 0;
+let trendTimer;
+
+const startMiniChartCaptions = () => {
+  if (!acqSparkDot || !acqCaption || !acqValue || !acqSparkPath) return;
+
+  const points = toSparkPoints(
+    acquisitionTrend.map((item) => item.value),
+    320,
+    120,
+    14
+  );
+
+  const update = () => {
+    const item = acquisitionTrend[trendIndex % acquisitionTrend.length];
+    const point = points[trendIndex % points.length];
+
+    acqSparkDot.setAttribute("cx", String(point.x));
+    acqSparkDot.setAttribute("cy", String(point.y));
+    acqValue.textContent = `${item.value}%`;
+    acqCaption.textContent = `${item.month}: Acquisition performance at ${item.value}%.`;
+
+    if (funnelCaption) {
+      const topStage = [...funnelStrength].sort((a, b) => b.value - a.value)[0];
+      funnelCaption.textContent =
+        `${item.month} view: strongest stage is ${topStage.stage} at ${topStage.value}%.`;
+    }
+  };
+
+  update();
+  if (trendTimer) clearInterval(trendTimer);
+  trendTimer = setInterval(() => {
+    trendIndex = (trendIndex + 1) % acquisitionTrend.length;
+    update();
+  }, 2800);
+};
+
 let highlightIndex = 0;
 let highlightTimer;
 
@@ -299,6 +418,7 @@ const setupReveal = () => {
   const revealEls = document.querySelectorAll(".reveal-up");
   let countersStarted = false;
   let languageAnimated = false;
+  let chartsAnimated = false;
 
   const observer = new IntersectionObserver(
     (entries) => {
@@ -318,6 +438,11 @@ const setupReveal = () => {
             el.style.width = `${value}%`;
           });
           languageAnimated = true;
+        }
+
+        if (!chartsAnimated && entry.target.closest("#insights")) {
+          animateMiniBars();
+          chartsAnimated = true;
         }
 
         observer.unobserve(entry.target);
@@ -478,11 +603,13 @@ const bootstrap = () => {
   renderEducation();
   renderAchievements();
   renderSkills();
+  renderMiniCharts();
 
   setActiveNav();
   setProgress();
   updateHighlight();
   startHighlightRotation();
+  startMiniChartCaptions();
 
   setupReveal();
   setupTyping();

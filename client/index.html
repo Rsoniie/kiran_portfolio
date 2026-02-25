@@ -32,6 +32,7 @@
         <a href="#experience">Experience</a>
         <a href="#education">Education</a>
         <a href="#achievements">Achievements</a>
+        <a href="#insights">Insights</a>
         <a href="#skills">Skills</a>
         <a href="#contact">Contact</a>
       </nav>
@@ -128,6 +129,38 @@
           <h2>Recognition & Measurable Impact</h2>
         </div>
         <div class="achievement-grid" id="achievementGrid"></div>
+      </div>
+    </section>
+
+    <section class="section section-soft" id="insights">
+      <div class="container">
+        <div class="section-head reveal-up">
+          <p class="section-tag">Insights</p>
+          <h2>Mini Performance Plots</h2>
+        </div>
+
+        <div class="mini-graph-grid">
+          <figure class="mini-chart reveal-up">
+            <div class="chart-head">
+              <h3>Acquisition Trend</h3>
+              <span id="acqValue">0%</span>
+            </div>
+            <svg class="spark-svg" id="acqSparkline" viewBox="0 0 320 120" role="img" aria-label="Acquisition trend graph">
+              <polyline id="acqSparkPath" class="spark-line" points=""></polyline>
+              <circle id="acqSparkDot" class="spark-dot" cx="0" cy="0" r="5"></circle>
+            </svg>
+            <figcaption id="acqCaption"></figcaption>
+          </figure>
+
+          <figure class="mini-chart reveal-up">
+            <div class="chart-head">
+              <h3>Funnel Stage Strength</h3>
+              <span>Current Snapshot</span>
+            </div>
+            <div class="mini-bars" id="funnelBars"></div>
+            <figcaption id="funnelCaption"></figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 
